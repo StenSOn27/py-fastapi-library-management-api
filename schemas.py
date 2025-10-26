@@ -1,72 +1,80 @@
 from datetime import date
-from typing import List
-from pydantic import BaseModel, Field, field_validator
+from typing import List, Optional
+from pydantic import BaseModel, field_validator
 
 
-# /// Author ///
 class AuthorBase(BaseModel):
     name: str
 
 
 class AuthorCreate(AuthorBase):
-    bio: str
-    books: List[int]
+    bio: Optional[str] = None
 
 
 class AuthorListItem(AuthorBase):
     id: int
 
+    class Config:
+        from_attributes = True
 
-class AuthorList(AuthorBase):
+
+class AuthorList(BaseModel):
     authors: List[AuthorListItem]
 
 
 class AuthorRetrieve(AuthorBase):
     id: int
-    bio: str
-    books: List[int]
+    bio: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 
-class AuthorUpdate(AuthorBase):
-    bio: str
-    books: List[int]
+class AuthorUpdate(BaseModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
 
 
-# /// Book ///
 class BookBase(BaseModel):
     title: str
 
 
 class BookCreate(BookBase):
-    title: str
-    summary: str
+    summary: Optional[str] = None
     publication_date: date
     author_id: int
 
     @field_validator("publication_date", mode="before")
     @classmethod
-    def publication_date_validation(cls, value: date) -> date:  
-        if value.day < date.today():
-            raise ValueError("The date must not be earlier than today's date")
+    def publication_date_validation(cls, value: date) -> date:
+        if value < date.today():
+            raise ValueError("The publication date cannot be earlier than today")
         return value
 
 
 class BookListItem(BookBase):
     id: int
 
+    class Config:
+        from_attributes = True
 
-class BookList(BookBase):
+
+class BookList(BaseModel):
     books: List[BookListItem]
 
 
 class BookRetrieve(BookBase):
     id: int
-    summary: str
+    summary: Optional[str] = None
     publication_date: date
     author_id: int
 
+    class Config:
+        from_attributes = True
 
-class BookUpdate(BookBase):
-    summary: str
-    publication_date: date
-    author_id: int
+
+class BookUpdate(BaseModel):
+    title: Optional[str] = None
+    summary: Optional[str] = None
+    publication_date: Optional[date] = None
+    author_id: Optional[int] = None
