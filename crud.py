@@ -6,6 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models import Author, Book
 from schemas import AuthorCreate, AuthorUpdate, BookCreate, BookUpdate
 
+from typing import List, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from models import Book, Author
+
 
 async def get_books_list(
     db: AsyncSession,
@@ -16,9 +21,9 @@ async def get_books_list(
     stmt = select(Book)
     if author_id:
         stmt = stmt.where(Book.author_id == author_id)
+    stmt = stmt.offset(skip).limit(limit)
     result = await db.execute(stmt)
-    books = result.scalars().all()
-    return books[skip: skip + limit]
+    return result.scalars().all()
 
 
 async def get_authors_list(
@@ -26,9 +31,9 @@ async def get_authors_list(
     skip: int = 0,
     limit: int = 10
 ) -> List[Author]:
-    result = await db.execute(select(Author))
-    authors = result.scalars().all()
-    return authors[skip: skip + limit]
+    stmt = select(Author).offset(skip).limit(limit)
+    result = await db.execute(stmt)
+    return result.scalars().all()
 
 
 async def get_author_by_id(db: AsyncSession, pk: int) -> Author:
@@ -49,12 +54,6 @@ async def create_book(
     db: AsyncSession,
     book_data: BookCreate
 ) -> Book:
-    existing_book = await db.execute(
-        select(Book).where(Book.title == book_data.title)
-    )
-    if existing_book.scalars().first():
-        raise HTTPException(status_code=400, detail="Book with following title already exists")
-
     new_book = Book(
         title=book_data.title,
         summary=book_data.summary,
@@ -66,7 +65,6 @@ async def create_book(
     await db.commit()
     await db.refresh(new_book)
     return new_book
-
 
 async def create_author(
     db: AsyncSession,
@@ -80,7 +78,8 @@ async def create_author(
 
     new_author = Author(
         name=author_data.name,
-        bio=author_data.bio
+        bio=author_data.bio,
+        books=author_data.books
     )
 
     db.add(new_author)

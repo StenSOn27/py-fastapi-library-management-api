@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 from crud import (
     create_author,
