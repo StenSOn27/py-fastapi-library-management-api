@@ -9,7 +9,7 @@ class AuthorBase(BaseModel):
 
 class AuthorCreate(AuthorBase):
     bio: Optional[str] = None
-
+    books: List[int] = []
 
 class AuthorListItem(AuthorBase):
     id: int

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import List, Optional
 from fastapi import Depends, FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +14,8 @@ from crud import (
     update_author,
     update_book,
 )
-from database import get_db
+
+from database import get_db, engine, Base
 from schemas import (
     AuthorCreate,
     AuthorRetrieve,
@@ -23,8 +25,14 @@ from schemas import (
     BookUpdate,
 )
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    await engine.dispose()
 
+app = FastAPI(lifespan=lifespan)
 
 # /// GET ///
 @app.get("/books/", response_model=List[BookRetrieve])

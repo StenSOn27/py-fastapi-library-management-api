@@ -6,11 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models import Author, Book
 from schemas import AuthorCreate, AuthorUpdate, BookCreate, BookUpdate
 
-from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from models import Book, Author
-
 
 async def get_books_list(
     db: AsyncSession,
