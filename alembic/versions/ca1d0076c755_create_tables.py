@@ -36,7 +36,6 @@ def upgrade() -> None:
     sa.Column('author_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['author_id'], ['authors.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('title')
     )
     # ### end Alembic commands ###
 
